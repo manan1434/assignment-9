@@ -1,0 +1,213 @@
+//Main.java import java.util.*;  public class Main {  public static void main(String args[]) { 
+        Scanner scan = new Scanner(System.in); 
+        StudentOperations operations = new StudentOperations(); 
+ int choice;  do { 
+ // Display menu options 
+            System.out.println("\nStudent Management System"); 
+            System.out.println("1. Add Student"); 
+            System.out.println("2. Display Students"); 
+            System.out.println("3. Search Student (By PRN)"); 
+            System.out.println("4. Search Student (By Name)"); 
+            System.out.println("5. Update Student"); 
+            System.out.println("6. Delete Student"); 
+            System.out.println("7. Exit");             System.out.print("Enter your choice: ");             choice = scan.nextInt();             scan.nextLine(); // Consume newline  // Perform selected operation  switch (choice) {  case 1: 
+                    operations.addStudent(scan); 
+ break;  case 2:                     operations.displayStudents();  break;  case 3:                     operations.searchByPRN(scan);  break;  case 4:                     operations.searchByName(scan);  break;  case 5:                     operations.updateStudent(scan);  break;  case 6:                     operations.deleteStudent(scan);  break;  case 7: 
+                    System.out.println("Exiting program...");  break;  default: 
+                    System.out.println("Invalid choice! Try again."); 
+            } 
+        }  
+while (choice != 7); 
+    } } 
+//DBConnection.java 
+import java.sql.*;  public class DBConnection {  private static final String URL = "jdbc:mysql://localhost:3306/student_db";  private static final String USER = "root";  private static final String PASS = "r1ddh118";  public static Connection getConnection() throws SQLException {  return DriverManager.getConnection(URL, USER, PASS); 
+    } 
+//Student.java public class Student {  private String name;  private long prn;  private String dept;  private String batch;  private double cgpa; 
+ // Constructor to initialize student attributes  public Student(String name, long prn, String dept, String batch, double cgpa) {  this.name = name; 
+ this.prn = prn;  this.dept = dept;  this.batch = batch;  this.cgpa = cgpa; 
+    } 
+ // Getter and Setter methods for encapsulation  public String getName() {  return name;  
+    } 
+ public void setName(String name) {  this.name = name;  
+    } 
+ public long getPRN() {  return prn;  
+    } 
+ public void setPRN(long prn) {  this.prn = prn;  
+    } 
+ public String getDept() {   return dept;  
+    } 
+ public void setDept(String dept) {  this.dept = dept;  
+    } 
+ public String getBatch() {  return batch;  
+    } 
+ public void setBatch(String batch) {  this.batch = batch;  
+    } 
+ public double getCGPA() {  return cgpa;  
+    } 
+ public void setCGPA(double cgpa) {  this.cgpa = cgpa;  
+    } 
+ // Method to display student details  public void display() { 
+        System.out.println("Name: " + name + ", PRN: " + prn + ", Department: " + dept + ",  Batch: " + batch + ", CGPA: " + cgpa); 
+  } 
+} 
+// Student.java 
+// Class representing a student with attributes like name, PRN, department, batch, and CGPA. 
+ 
+public class Student {     private String name;     private long prn;     private String dept;     private String batch;     private double cgpa; 
+ 
+    // Constructor to initialize student attributes 
+    public Student(String name, long prn, String dept, String batch, double cgpa) {         this.name = name;         this.prn = prn;         this.dept = dept;         this.batch = batch;         this.cgpa = cgpa; 
+    } 
+ 
+    // Getter and Setter methods for encapsulation     public String getName() {          return name;  
+    } 
+    public void setName(String name) {          this.name = name;  
+    } 
+    public long getPRN() {          return prn;  
+    } 
+    public void setPRN(long prn) {          this.prn = prn;  
+    } 
+    public String getDept() {           return dept;  
+    } 
+    public void setDept(String dept) {          this.dept = dept;  
+    } 
+    public String getBatch() {          return batch;  
+    } 
+    public void setBatch(String batch) {          this.batch = batch;  
+    } 
+ 
+    public double getCGPA() {          return cgpa;  
+    } 
+    public void setCGPA(double cgpa) {          this.cgpa = cgpa;  
+    } 
+ 
+    // Method to display student details     public void display() { 
+        System.out.println("Name: " + name + ", PRN: " + prn + ", Department: " + dept + ", Batch: " + batch + ", CGPA: " + cgpa); 
+    } 
+} 
+// StudentOperations.java 
+// Class to manage student records using MySQL through JDBC (no in-memory storage). 
+ 
+import java.sql.*; import java.util.Scanner; 
+ 
+class StudentOperations { 
+ 
+    // Method to add a new student     public void addStudent(Scanner scan) { 
+        try (Connection conn = DBConnection.getConnection()) { 
+            System.out.print("Enter name: "); 
+            String name = scan.nextLine();             System.out.print("Enter PRN: ");             long prn = scan.nextLong();             scan.nextLine(); 
+            System.out.print("Enter Department: "); 
+            String dept = scan.nextLine(); 
+            System.out.print("Enter Batch (YYYY-YY): "); 
+            String batch = scan.nextLine();             System.out.print("Enter CGPA: ");             double cgpa = scan.nextDouble();             scan.nextLine(); 
+ 
+            String sql = "INSERT INTO students (prn, name, dept, batch, cgpa) VALUES (?, ?, ?, ?, ?)"; 
+            PreparedStatement stmt = conn.prepareStatement(sql);             stmt.setLong(1, prn);             stmt.setString(2, name);             stmt.setString(3, dept);             stmt.setString(4, batch);             stmt.setDouble(5, cgpa);             stmt.executeUpdate(); 
+ 
+            System.out.println("Student added successfully."); 
+        } catch (SQLException e) { 
+            System.out.println("Error adding student: " + e.getMessage()); 
+        } 
+    } 
+ 
+    // Method to display all students     public void displayStudents() { 
+        try (Connection conn = DBConnection.getConnection()) { 
+            String sql = "SELECT * FROM students"; 
+            Statement stmt = conn.createStatement(); 
+            ResultSet rs = stmt.executeQuery(sql); 
+ 
+            boolean found = false;             while (rs.next()) {                 found = true; 
+                System.out.println("Name: " + rs.getString("name") + 
+                        ", PRN: " + rs.getLong("prn") + 
+                        ", Dept: " + rs.getString("dept") + 
+                        ", Batch: " + rs.getString("batch") + 
+                        ", CGPA: " + rs.getDouble("cgpa")); 
+            } 
+            if (!found) System.out.println("No student records found."); 
+        } catch (SQLException e) { 
+            System.out.println("Error displaying students: " + e.getMessage()); 
+        } 
+    } 
+ 
+    // Method to search student by PRN     public void searchByPRN(Scanner scan) {         System.out.print("Enter PRN: ");         long prn = scan.nextLong();         scan.nextLine(); 
+        try (Connection conn = DBConnection.getConnection()) { 
+            String sql = "SELECT * FROM students WHERE prn = ?";             PreparedStatement stmt = conn.prepareStatement(sql);             stmt.setLong(1, prn); 
+            ResultSet rs = stmt.executeQuery(); 
+ 
+            if (rs.next()) { 
+                System.out.println("Name: " + rs.getString("name") + 
+                        ", PRN: " + rs.getLong("prn") + 
+                        ", Dept: " + rs.getString("dept") + 
+                        ", Batch: " + rs.getString("batch") + 
+                        ", CGPA: " + rs.getDouble("cgpa")); 
+            } else { 
+                System.out.println("Student not found."); 
+            } 
+        } catch (SQLException e) { 
+            System.out.println("Error searching by PRN: " + e.getMessage()); 
+        } 
+    } 
+ 
+    // Method to search student by Name     public void searchByName(Scanner scan) { 
+        System.out.print("Enter Name: ");         String name = scan.nextLine(); 
+        try (Connection conn = DBConnection.getConnection()) { 
+            String sql = "SELECT * FROM students WHERE name LIKE ?";             PreparedStatement stmt = conn.prepareStatement(sql);             stmt.setString(1, "%" + name + "%"); 
+            ResultSet rs = stmt.executeQuery(); 
+ 
+            boolean found = false;             while (rs.next()) {                 found = true; 
+                System.out.println("Name: " + rs.getString("name") + 
+                        ", PRN: " + rs.getLong("prn") + 
+                        ", Dept: " + rs.getString("dept") + 
+                        ", Batch: " + rs.getString("batch") + 
+                        ", CGPA: " + rs.getDouble("cgpa")); 
+            }             if (!found) { 
+                System.out.println("No student found with that name."); 
+            } 
+        } catch (SQLException e) { 
+            System.out.println("Error searching by name: " + e.getMessage()); 
+        } 
+    } 
+ 
+    // Method to update student details     public void updateStudent(Scanner scan) { 
+        System.out.print("Enter PRN of student to update: ");         long prn = scan.nextLong();         scan.nextLine(); 
+ 
+        try (Connection conn = DBConnection.getConnection()) { 
+            String checkSql = "SELECT * FROM students WHERE prn = ?";             PreparedStatement checkStmt = conn.prepareStatement(checkSql);             checkStmt.setLong(1, prn); 
+            ResultSet rs = checkStmt.executeQuery(); 
+ 
+            if (rs.next()) { 
+                System.out.print("Enter new name: "); 
+                String name = scan.nextLine(); 
+                System.out.print("Enter new Department: "); 
+                String dept = scan.nextLine(); 
+                System.out.print("Enter new Batch: "); 
+                String batch = scan.nextLine();                 System.out.print("Enter new CGPA: ");                 double cgpa = scan.nextDouble();                 scan.nextLine(); 
+ 
+                String updateSql = "UPDATE students SET name=?, dept=?, batch=?, cgpa=? WHERE prn=?"; 
+                PreparedStatement stmt = conn.prepareStatement(updateSql);                 stmt.setString(1, name);                 stmt.setString(2, dept);                 stmt.setString(3, batch);                 stmt.setDouble(4, cgpa);                 stmt.setLong(5, prn);                 stmt.executeUpdate(); 
+ 
+                System.out.println("Student details updated."); 
+            } else { 
+                System.out.println("Student with PRN " + prn + " not found."); 
+            } 
+        } catch (SQLException e) { 
+            System.out.println("Error updating student: " + e.getMessage()); 
+        } 
+    } 
+ 
+    // Method to delete student by PRN     public void deleteStudent(Scanner scan) { 
+        System.out.print("Enter PRN of student to delete: ");         long prn = scan.nextLong();         scan.nextLine(); 
+ 
+        try (Connection conn = DBConnection.getConnection()) { 
+            String deleteSql = "DELETE FROM students WHERE prn = ?";             PreparedStatement stmt = conn.prepareStatement(deleteSql);             stmt.setLong(1, prn);             int rows = stmt.executeUpdate(); 
+ 
+            if (rows > 0) { 
+                System.out.println("Student deleted successfully."); 
+            } else { 
+                System.out.println("Student with PRN " + prn + " not found."); 
+            } 
+        } catch (SQLException e) { 
+            System.out.println("Error deleting student: " + e.getMessage()); 
+        } 
+    } 
+} 
